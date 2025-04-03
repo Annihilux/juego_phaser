@@ -64,27 +64,38 @@ export class Game extends Scene
         
         this.physics.add.collider(this.player, this.suelos);
         this.cursors = this.input.keyboard.createCursorKeys();
-
-
-        /*
-        this.add.image(512, 384, 'background');
-        this.add.image(512, 350, 'logo').setDepth(100);
-        this.add.text(512, 490, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);*/
         
+        this.inicializarEstrellas();
+
     }
 
+    inicializarEstrellas(){
+
+        this.stars = this.physics.add.group();
+        var i=0;
+        for(i=0; i<11; i++){
+            var star=this.stars.create(12+(i*70), 0, 'star');
+            star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));;
+        }
+
+        this.physics.add.collider(this.stars, this.suelos);
+        this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
+
+    }
+
+    collectStar (player, star){
+        star.disableBody(true, true);
+    }
+
+
     update(){
-        if (this.cursors.left.isDown)
+        if (this.cursors.left.isDown || this.input.keyboard.addKey("A").isDown)
             {
                 this.player.setVelocityX(-160);
             
                 this.player.anims.play('left', true);
             }
-            else if (this.cursors.right.isDown)
+            else if (this.cursors.right.isDown || this.input.keyboard.addKey("D").isDown)
             {
                 this.player.setVelocityX(160);
             
