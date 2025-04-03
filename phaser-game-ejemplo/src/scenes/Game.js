@@ -35,6 +35,11 @@ export class Game extends Scene
         this.suelos.create(50, 250, 'ground');
         this.suelos.create(750, 220, 'ground');
 
+        this.score = 0;
+        this.scoreText;
+
+        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+
         this.player = this.physics.add.sprite(100, 450, 'dude');
 
         this.player.setBounce(0.2);
@@ -66,6 +71,7 @@ export class Game extends Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         
         this.inicializarEstrellas();
+        this.inicializarBombas();
 
     }
 
@@ -85,6 +91,58 @@ export class Game extends Scene
 
     collectStar (player, star){
         star.disableBody(true, true);
+
+        this.score += 10;
+        this.scoreText.setText('Score: ' + this.score);
+
+        if(this.stars.countActive(true)==0){
+
+            var i=0;
+            for(i=0; i<this.stars.getChildren().length; i++){
+                var starTemp = this.stars.getChildren()[i];
+                starTemp.enableBody(true, starTemp.x, 0, true, true);
+            }
+
+            var x =0;
+            if(this.player.x<400){
+                x=Phaser.Math.Between(400, 800);
+            }
+            else{
+                x=Phaser.Math.Between(0, 400)
+            }
+
+            var bomb = this.bombs.create(x, 16, 'bomb');
+            bomb.setBounce(1);
+            bomb.setCollideWorldBounds(true);
+            bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    
+
+            this.stars.children.iterate(function (child) {
+
+                child.enableBody(true, child.x, 0, true, true);
+    
+            });
+        }
+
+    }
+
+    inicializarBombas() {
+        this.bombs = this.physics.add.group();
+
+        this.physics.add.collider(this.bombs, this.platforms);
+
+        this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
+
+    }
+
+    hitBomb (player, bomb){
+        this.physics.pause();
+
+        this.player.setTint(0xff0000);
+
+        this.player.anims.play('turn');
+
+        this.gameOver = true;
     }
 
 
